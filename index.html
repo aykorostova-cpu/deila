@@ -306,6 +306,10 @@ input:focus, select:focus, textarea:focus { border-color: var(--cyan); box-shado
 .consent-field input { width: 22px; min-height: 22px; margin: 0; accent-color: var(--navy); }
 .consent-field a { color: var(--navy); font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
 .form-status { margin: 0; padding: 13px; border: 1px solid #79c69a; border-radius: 4px; background: #e8f8ef; color: #155b35; font-weight: 700; }
+.form-status[data-state="pending"] { border-color: #8fbdd1; background: #edf8fc; color: var(--navy); }
+.form-status[data-state="error"] { border-color: #d98a8a; background: #fff0f0; color: #8a2020; }
+.button[disabled] { cursor: wait; opacity: .68; }
+.form-honeypot { position: absolute !important; left: -10000px !important; width: 1px !important; height: 1px !important; overflow: hidden !important; }
 
 .wholesale { display: grid; grid-template-columns: minmax(0, .7fr) minmax(460px, 1fr); gap: clamp(48px, 8vw, 120px); background: var(--navy); }
 .wholesale h2 { color: #fff; }
@@ -927,8 +931,8 @@ html.has-legal-dialog { overflow: hidden; }
 <div class="form-intro" data-reveal="true">
 <p class="eyebrow">Покупка на сайте</p>
 <h2>Оформите заказ за пару минут</h2>
-<p>Заполните данные. Сайт подготовит письмо с заказом для отправки на info.delmar@yandex.ru.</p>
-<p class="privacy-note">Данные не сохраняются на сайте и обрабатываются локально в вашем браузере до отправки письма.</p>
+<p>Заполните данные и отправьте заказ. Менеджер получит его в Telegram и свяжется с вами для подтверждения.</p>
+<p class="privacy-note">Данные передаются ООО «Дель Мар» через защищённый обработчик Google Apps Script и не публикуются на сайте.</p>
 </div>
 <form class="order-form" data-reveal="true">
 <div class="field-row">
@@ -967,7 +971,7 @@ html.has-legal-dialog { overflow: hidden; }
 <input type="checkbox" required="" name="consent"/>
 <span>Я даю отдельное <a href="#personal-data-consent" target="_blank">согласие на обработку персональных данных</a> и ознакомлен с <a href="#privacy-policy" target="_blank">политикой конфиденциальности</a>.</span>
 </label>
-<button class="button button-full" type="submit">Подготовить заказ</button>
+<button class="button button-full" type="submit">Отправить заказ</button>
 </form>
 </section>
 <section class="wholesale section" id="wholesale">
@@ -1007,7 +1011,7 @@ html.has-legal-dialog { overflow: hidden; }
 <input type="checkbox" required="" name="consent"/>
 <span>Я даю отдельное <a href="#personal-data-consent" target="_blank">согласие на обработку персональных данных</a> и ознакомлен с <a href="#privacy-policy" target="_blank">политикой конфиденциальности</a>.</span>
 </label>
-<button class="button button-full" type="submit">Запросить оптовый прайс</button>
+<button class="button button-full" type="submit">Отправить запрос на прайс</button>
 </form>
 </section>
 <section class="contact section" id="contact">
@@ -1031,7 +1035,7 @@ html.has-legal-dialog { overflow: hidden; }
 <input type="checkbox" required="" name="consent"/>
 <span>Я даю отдельное <a href="#personal-data-consent" target="_blank">согласие на обработку персональных данных</a> и ознакомлен с <a href="#privacy-policy" target="_blank">политикой конфиденциальности</a>.</span>
 </label>
-<button class="button button-full" type="submit">Задать вопрос</button>
+<button class="button button-full" type="submit">Отправить вопрос</button>
 </form>
 </section>
 <footer class="footer">
@@ -1128,7 +1132,7 @@ html.has-legal-dialog { overflow: hidden; }
 <h2>4. Порядок обработки</h2>
 <p>4.1. Обработка может включать сбор, запись, систематизацию, накопление, хранение, уточнение, извлечение, использование, передачу в объёме, необходимом для доставки, блокирование, удаление и уничтожение данных.</p>
 <p>4.2. Данные обрабатываются с использованием средств автоматизации и без их использования.</p>
-<p>4.3. В текущей версии сайта сведения, введённые в форму, обрабатываются локально в браузере и используются для подготовки письма. Сайт не сохраняет содержимое формы в собственной базе данных. Передача оператору происходит после отправки письма пользователем через его почтовое приложение.</p>
+<p>4.3. Сведения, введённые в форму, передаются оператору через Google Apps Script и Telegram Bot API для получения и обработки заявки. Сайт не публикует содержимое формы и не сохраняет его в собственной базе данных.</p>
 <p>4.4. Для исполнения доставки оператор вправе передать необходимый минимум данных выбранной пользователем службе доставки или транспортной компании.</p>
 <h2>5. Правовые основания</h2>
 <p>Правовыми основаниями обработки являются согласие субъекта персональных данных, действия по инициативе субъекта для заключения и исполнения договора, а также обязанности оператора, установленные законодательством Российской Федерации.</p>
@@ -1275,19 +1279,58 @@ html.has-legal-dialog { overflow: hidden; }
     this.closest(".testimonials-more")?.remove();
   });
 
-  function openMail(subject, lines) {
-    location.href = `mailto:info.delmar@yandex.ru?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines.join("\n"))}`;
-  }
+  const orderEndpoint = "https://script.google.com/macros/s/AKfycbySHXGAZQ13T1Sn_8jzisc54UVNDU7XMnvkmFi4b2np24sPAC18iQFUKCyc7g8565DF/exec";
 
-  function showStatus(form, message) {
+  function showStatus(form, message, state = "success") {
     let status = form.querySelector(".form-status");
     if (!status) {
       status = document.createElement("p");
       status.className = "form-status";
       status.setAttribute("role", "status");
+      status.setAttribute("aria-live", "polite");
       form.append(status);
     }
+    status.dataset.state = state;
     status.textContent = message;
+  }
+
+  async function sendForm(form, formType, data) {
+    const submit = form.querySelector('button[type="submit"]');
+    const originalLabel = submit?.textContent || "Отправить";
+    const formData = new FormData(form);
+    const payload = {
+      formType,
+      consent: formData.has("consent"),
+      marketingConsent: formData.has("marketingConsent"),
+      website: formData.get("website") || "",
+      pageUrl: location.href,
+      data,
+    };
+
+    if (submit) {
+      submit.disabled = true;
+      submit.textContent = "Отправляем…";
+    }
+    showStatus(form, "Передаём заявку менеджеру…", "pending");
+
+    try {
+      const body = new URLSearchParams({ payload: JSON.stringify(payload) });
+      await fetch(orderEndpoint, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+        body,
+      });
+      form.reset();
+      showStatus(form, "Заявка отправлена. Менеджер свяжется с вами для подтверждения.", "success");
+    } catch (error) {
+      showStatus(form, "Не удалось отправить заявку. Проверьте интернет и повторите отправку или позвоните нам: +7 915 224-17-93.", "error");
+    } finally {
+      if (submit) {
+        submit.disabled = false;
+        submit.textContent = originalLabel;
+      }
+    }
   }
 
   document.querySelectorAll(".order-form, .wholesale-form, .feedback-form").forEach((form) => {
@@ -1298,6 +1341,12 @@ html.has-legal-dialog { overflow: hidden; }
 <span>Хочу получать необязательные рекламные и маркетинговые сообщения DELTAEXPRESS. Согласие можно отозвать в любой момент.</span>`;
     const submit = form.querySelector('button[type="submit"]');
     form.insertBefore(field, submit);
+
+    const honeypot = document.createElement("label");
+    honeypot.className = "form-honeypot";
+    honeypot.setAttribute("aria-hidden", "true");
+    honeypot.innerHTML = `<span>Не заполняйте это поле</span><input type="text" name="website" tabindex="-1" autocomplete="off">`;
+    form.insertBefore(honeypot, submit);
   });
 
   document.querySelector(".order-form")?.addEventListener("submit", function (event) {
@@ -1305,48 +1354,42 @@ html.has-legal-dialog { overflow: hidden; }
     if (!this.reportValidity()) return;
     const data = new FormData(this);
     const packText = this.querySelector('select[name="pack"] option:checked')?.textContent || data.get("pack");
-    openMail("Розничный заказ DELTAEXPRESS", [
-      `Комплект: ${packText}`,
-      `Количество комплектов: ${data.get("quantity")}`,
-      `ФИО: ${data.get("fullName")}`,
-      `Телефон: ${data.get("phone")}`,
-      `Email: ${data.get("email") || "не указан"}`,
-      `Адрес: ${data.get("address")}`,
-      `Доставка: ${data.get("delivery")}`,
-      `Комментарий: ${data.get("comment") || "нет"}`,
-      `Маркетинговая рассылка: ${data.has("marketingConsent") ? "согласен" : "не согласен"}`,
-    ]);
-    showStatus(this, "Заявка сформирована. Завершите отправку в открывшемся почтовом приложении.");
+    sendForm(this, "order", {
+      pack: packText,
+      quantity: data.get("quantity"),
+      fullName: data.get("fullName"),
+      phone: data.get("phone"),
+      email: data.get("email"),
+      address: data.get("address"),
+      delivery: data.get("delivery"),
+      comment: data.get("comment"),
+    });
   });
 
   document.querySelector(".wholesale-form")?.addEventListener("submit", function (event) {
     event.preventDefault();
     if (!this.reportValidity()) return;
     const data = new FormData(this);
-    openMail("Запрос оптового прайса DELTAEXPRESS", [
-      `Организация: ${data.get("company")}`,
-      `ИНН / КПП: ${data.get("tax")}`,
-      `Нужное количество рулонов: ${data.get("rolls")}`,
-      `Контактное лицо: ${data.get("contact")}`,
-      `Телефон: ${data.get("phone")}`,
-      `Email: ${data.get("email")}`,
-      `Реквизиты и адрес: ${data.get("details")}`,
-      `Маркетинговая рассылка: ${data.has("marketingConsent") ? "согласен" : "не согласен"}`,
-    ]);
-    showStatus(this, "Запрос на оптовый прайс сформирован. Завершите отправку в почтовом приложении.");
+    sendForm(this, "wholesale", {
+      company: data.get("company"),
+      tax: data.get("tax"),
+      rolls: data.get("rolls"),
+      contact: data.get("contact"),
+      phone: data.get("phone"),
+      email: data.get("email"),
+      details: data.get("details"),
+    });
   });
 
   document.querySelector(".feedback-form")?.addEventListener("submit", function (event) {
     event.preventDefault();
     if (!this.reportValidity()) return;
     const data = new FormData(this);
-    openMail("Вопрос с сайта DELTAEXPRESS", [
-      `Имя: ${data.get("name")}`,
-      `Телефон или email: ${data.get("contact")}`,
-      `Вопрос: ${data.get("message")}`,
-      `Маркетинговая рассылка: ${data.has("marketingConsent") ? "согласен" : "не согласен"}`,
-    ]);
-    showStatus(this, "Сообщение подготовлено. Завершите отправку в почтовом приложении.");
+    sendForm(this, "feedback", {
+      name: data.get("name"),
+      contact: data.get("contact"),
+      message: data.get("message"),
+    });
   });
 })();
 
