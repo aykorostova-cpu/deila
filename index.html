@@ -315,7 +315,8 @@ input:focus, select:focus, textarea:focus { border-color: var(--cyan); box-shado
 .form-status { margin: 0; padding: 13px; border: 1px solid #79c69a; border-radius: 4px; background: #e8f8ef; color: #155b35; font-weight: 700; }
 .form-status[data-state="pending"] { border-color: #8fbdd1; background: #edf8fc; color: var(--navy); }
 .form-status[data-state="error"] { border-color: #d98a8a; background: #fff0f0; color: #8a2020; }
-.button[disabled] { cursor: wait; opacity: .68; }
+.button[disabled] { cursor: not-allowed; opacity: .56; box-shadow: none; transform: none; }
+.button[data-submitting="true"] { cursor: wait; opacity: .68; }
 .form-honeypot { position: absolute !important; left: -10000px !important; width: 1px !important; height: 1px !important; overflow: hidden !important; }
 
 .wholesale { display: grid; grid-template-columns: minmax(0, .7fr) minmax(460px, 1fr); gap: clamp(48px, 8vw, 120px); background: var(--navy); }
@@ -486,6 +487,7 @@ textarea { resize: vertical; }
 }
 .cookie-banner[hidden] { display: none; }
 .cookie-banner p { margin: 0; color: #dce8ef; font-size: 14px; line-height: 1.5; }
+.cookie-banner p a { color: #fff; font-weight: 800; }
 .cookie-banner strong { display: block; margin-bottom: 4px; color: #fff; font-family: "Rubik", sans-serif; font-size: 17px; }
 .cookie-actions { display: grid; gap: 10px; width: 230px; }
 .cookie-policy-button { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; padding: 9px 14px; border: 1px solid #7fdfff; border-radius: 5px; background: transparent; color: #dff6ff; font: inherit; font-weight: 800; cursor: pointer; }
@@ -841,7 +843,7 @@ html.has-legal-dialog { overflow: hidden; }
 <p class="eyebrow">Покупка на сайте</p>
 <h2>Оформите заказ за пару минут</h2>
 <p>Заполните данные и отправьте заказ. Менеджер свяжется с вами для подтверждения.</p>
-<p class="privacy-note">Отправляя форму, вы соглашаетесь с обработкой персональных данных. Подробности — в политике обработки персональных данных.</p>
+<p class="privacy-note">Для заказа нужны отдельные согласия. Полные условия открываются по ссылкам ниже.</p>
 </div>
 <form class="order-form" data-reveal="true">
 <div class="field-row">
@@ -878,13 +880,13 @@ html.has-legal-dialog { overflow: hidden; }
 </label>
 <label class="consent-field">
 <input type="checkbox" required="" name="consent"/>
-<span>Я даю <a href="#personal-data-consent">согласие на обработку персональных данных</a>.</span>
+<span>Даю <a href="consent.html">согласие на обработку персональных данных</a>.</span>
 </label>
 <label class="consent-field">
 <input type="checkbox" required="" name="offerAccepted"/>
-<span>Я ознакомлен(а) и согласен(на) с условиями <a href="#public-offer">публичной оферты</a>.</span>
+<span>Ознакомлен(а) и согласен(на) с условиями <a href="offer.html">публичной оферты</a>.</span>
 </label>
-<p class="form-legal-note">До отправки заказа ознакомьтесь с <a href="#privacy-policy">политикой обработки персональных данных</a>.</p>
+<p class="form-legal-note">Также доступна <a href="privacy.html">политика обработки персональных данных</a>.</p>
 <button class="button button-full" type="submit">Отправить заказ</button>
 </form>
 </section>
@@ -934,9 +936,11 @@ html.has-legal-dialog { overflow: hidden; }
 </div>
 <div class="footer-column">
 <p class="footer-title">Документы</p>
-<a href="#public-offer">Публичная оферта</a>
-<a href="#privacy-policy">Политика обработки персональных данных</a>
-<a href="#personal-data-consent">Согласие на обработку данных</a>
+<a href="offer.html">Публичная оферта</a>
+<a href="privacy.html">Политика конфиденциальности</a>
+<a href="consent.html">Согласие на обработку данных</a>
+<a href="marketing-consent.html">Согласие на рассылку</a>
+<a href="cookies.html">Политика cookie</a>
 </div>
 </div>
 <details class="requisites">
@@ -1010,9 +1014,9 @@ html.has-legal-dialog { overflow: hidden; }
 <h2>4. Порядок обработки</h2>
 <p>4.1. Обработка может включать сбор, запись, систематизацию, накопление, хранение, уточнение, извлечение, использование, передачу в объёме, необходимом для доставки, блокирование, удаление и уничтожение данных.</p>
 <p>4.2. Данные обрабатываются с использованием средств автоматизации и без их использования.</p>
-<p>4.3. Сведения, введённые в форму, передаются оператору через Google Apps Script и Telegram Bot API для получения и обработки заявки. Сайт не публикует содержимое формы и не сохраняет его в собственной базе данных.</p>
+<p>4.3. Сведения, введённые в форму, передаются оператору через сервис автоматизации и другие мессенджеры, используемые для получения и обработки заявки. Сайт не публикует содержимое формы и не сохраняет его в собственной базе данных.</p>
 <p>4.4. Для исполнения доставки оператор вправе передать необходимый минимум данных выбранной пользователем службе доставки или транспортной компании.</p>
-<p>4.5. Google и Telegram являются самостоятельными владельцами используемых сервисов и могут обрабатывать техническую информацию в соответствии со своими документами. Использование таких сервисов может приводить к трансграничной передаче персональных данных. Оператор обязан выполнять установленные законом требования до начала такой передачи.</p>
+<p>4.5. Владельцы используемых сервисов могут обрабатывать техническую информацию в соответствии со своими документами. Если использование сервиса приводит к трансграничной передаче персональных данных, оператор выполняет установленные законом требования до начала такой передачи.</p>
 <h2>5. Правовые основания</h2>
 <p>Правовыми основаниями обработки являются согласие субъекта персональных данных, действия по инициативе субъекта для заключения и исполнения договора, а также обязанности оператора, установленные законодательством Российской Федерации.</p>
 <h2>6. Сроки хранения и уничтожение</h2>
@@ -1140,21 +1144,18 @@ html.has-legal-dialog { overflow: hidden; }
     cookieBanner.setAttribute("aria-live", "polite");
     cookieBanner.innerHTML = `
       <p>
-<strong>Необходимые cookie</strong>Сайт может сохранить один cookie только после вашего согласия, чтобы запомнить этот выбор. Без него формы и основные функции сайта продолжают работать.</p>
+<strong>Настройки cookie</strong>Мы используем cookie для работы сайта. Аналитика может включаться только с вашего разрешения. <a href="cookies.html">Подробнее</a>.</p>
       <div class="cookie-actions">
-        <button class="cookie-policy-button" type="button" data-cookie-policy-open>Подробнее</button>
-        <button class="cookie-policy-button" type="button" data-cookie-decline>Продолжить без cookie</button>
-        <button class="button" type="button" data-cookie-accept>Принять необходимые</button>
+        <button class="cookie-policy-button" type="button" data-cookie-decline>Только необходимые</button>
+        <button class="button" type="button" data-cookie-accept>Принять все</button>
       </div>`;
     document.body.append(cookieBanner);
-    cookieBanner.querySelector("[data-cookie-policy-open]")?.addEventListener("click", () => {
-      document.getElementById("privacy-policy")?.showModal();
-    });
     cookieBanner.querySelector("[data-cookie-accept]")?.addEventListener("click", () => {
-      document.cookie = `${consentCookieName}=necessary; Max-Age=31536000; Path=/; SameSite=Lax`;
+      document.cookie = `${consentCookieName}=all; Max-Age=31536000; Path=/; SameSite=Lax; Secure`;
       cookieBanner.hidden = true;
     });
     cookieBanner.querySelector("[data-cookie-decline]")?.addEventListener("click", () => {
+      document.cookie = `${consentCookieName}=necessary; Max-Age=31536000; Path=/; SameSite=Lax; Secure`;
       cookieBanner.hidden = true;
     });
   }
@@ -1238,6 +1239,7 @@ html.has-legal-dialog { overflow: hidden; }
 
     if (submit) {
       submit.disabled = true;
+      submit.dataset.submitting = "true";
       submit.textContent = "Отправляем…";
     }
     showStatus(form, "Передаём заявку менеджеру…", "pending");
@@ -1256,6 +1258,7 @@ html.has-legal-dialog { overflow: hidden; }
       showStatus(form, "Не удалось отправить заявку. Проверьте интернет и повторите отправку или позвоните нам: +7 915 224-17-93.", "error");
     } finally {
       if (submit) {
+        delete submit.dataset.submitting;
         submit.disabled = false;
         submit.textContent = originalLabel;
       }
@@ -1267,7 +1270,7 @@ html.has-legal-dialog { overflow: hidden; }
     const field = document.createElement("label");
     field.className = "consent-field marketing-consent-field";
     field.innerHTML = `<input type="checkbox" name="marketingConsent" value="yes">
-<span>Хочу получать новостные сообщения о ленте DELTAEXPRESS.</span>`;
+<span>Хочу получать новости и скидки. <a href="marketing-consent.html">Условия рассылки</a>.</span>`;
     const submit = form.querySelector('button[type="submit"]');
     form.insertBefore(field, submit);
 
@@ -1277,6 +1280,17 @@ html.has-legal-dialog { overflow: hidden; }
     honeypot.innerHTML = `<span>Не заполняйте это поле</span><input type="text" name="website" tabindex="-1" autocomplete="off">`;
     form.insertBefore(honeypot, submit);
   });
+
+  const orderForm = document.querySelector(".order-form");
+  if (orderForm) {
+    const submit = orderForm.querySelector('button[type="submit"]');
+    const requiredConsents = Array.from(orderForm.querySelectorAll('input[name="consent"], input[name="offerAccepted"]'));
+    const syncSubmit = () => {
+      if (submit) submit.disabled = !requiredConsents.every((input) => input.checked);
+    };
+    requiredConsents.forEach((input) => input.addEventListener("change", syncSubmit));
+    syncSubmit();
+  }
 
   document.querySelector(".order-form")?.addEventListener("submit", function (event) {
     event.preventDefault();
@@ -1327,7 +1341,7 @@ if (privacyContent && !privacyContent.querySelector("[data-cookie-policy]")) {
   privacyContent.insertAdjacentHTML("beforeend", `
     <section data-cookie-policy>
       <h2>11. Файлы cookie</h2>
-      <p>Сайт использует только необходимый файл cookie <strong>delta_cookie_consent</strong>, чтобы сохранить выбор пользователя о принятии необходимых cookie. Срок хранения — до 12 месяцев. Рекламные, аналитические и сторонние cookie сайтом не устанавливаются. Пользователь может удалить этот файл в настройках браузера; после удаления баннер согласия появится снова.</p>
+      <p>Сайт сохраняет файл cookie <strong>delta_cookie_consent</strong>, чтобы запомнить выбор пользователя. Срок хранения — до 12 месяцев. Аналитические технологии могут включаться только после выбора «Принять все». Подробнее — в отдельной политике cookie.</p>
     </section>`);
 }
 
